@@ -12,11 +12,13 @@ echo "[entrypoint] Starting Xvfb on display ${DISPLAY} (${RESOLUTION})"
 Xvfb "${DISPLAY}" -screen 0 "${RESOLUTION}" -nolisten tcp &
 XVFB_PID=$!
 
-# Wait until Xvfb is accepting connections
-for i in $(seq 1 20); do
+# Wait until Xvfb is accepting connections (xdpyinfo is installed via x11-utils)
+for i in $(seq 1 30); do
     xdpyinfo -display "${DISPLAY}" >/dev/null 2>&1 && break
-    sleep 0.2
+    sleep 0.3
 done
+# Ensure Xvfb is up even if xdpyinfo check was inconclusive
+sleep 0.5
 
 # ── 2. VNC server ──────────────────────────────────────────────────────────────
 echo "[entrypoint] Starting x11vnc on port ${VNC_PORT}"

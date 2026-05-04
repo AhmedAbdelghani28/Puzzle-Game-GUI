@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         x11vnc \
         novnc \
         websockify \
+        x11-utils \
         libgl1 \
         libglib2.0-0 \
         libdbus-1-3 \
@@ -39,6 +40,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxcb-randr0 \
         libxcb-render-util0 \
         libxcb-shape0 \
+        libxcb-util1 \
+        libxcb-xfixes0 \
         libxcb-xinerama0 \
         libxcb-xkb1 \
         libxkbcommon-x11-0 \

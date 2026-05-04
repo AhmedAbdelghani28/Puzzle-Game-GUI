@@ -23,6 +23,16 @@ Then open **http://localhost:6080/vnc.html** in your browser.
 > The container streams the GUI over noVNC (browser-based VNC).  
 > Closing the app window stops the container automatically.
 
+### Docker fixes (applied)
+
+Earlier builds had three silent failures on first run:
+
+| Issue | Root cause | Fix |
+|-------|-----------|-----|
+| Xvfb readiness check did nothing | `xdpyinfo` (from `x11-utils`) was not installed | Added `x11-utils` to `apt-get install` |
+| `qt.qpa.plugin: Could not load the Qt platform plugin "xcb"` | `libxcb-util1` and `libxcb-xfixes0` missing | Added both packages to `apt-get install` |
+| x11vnc connected before Xvfb was ready | Wait loop exited too early with no working probe | Extended loop to 30 iterations + added `sleep 0.5` guard |
+
 ## Local Setup
 
 ```bash
