@@ -1,0 +1,15 @@
+services:
+  puzzle-game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: puzzle-game
+    ports:
+      - "6080:6080"    # noVNC web UI  →  http://localhost:6080/vnc.html
+    environment:
+      - DISPLAY=:99
+      - QT_QPA_PLATFORM=xcb
+    # Keep stdin open so the app can receive keyboard events via VNC
+    stdin_open: true
+    tty: true
+    restart: "no"      # stop when the user closes the app window

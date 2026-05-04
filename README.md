@@ -1,54 +1,74 @@
-# 🧩 Puzzle Game GUI
+# Puzzle Game GUI
 
-A Python desktop app that brings together **three classic logic puzzles** — Sudoku, Maze Solver, and Word Ladder — into a clean and modern graphical interface built with **CustomTkinter**.
+A Python desktop application with three classic logic puzzles in a modern dark-mode interface built on **PyQt6**.
 
----
+## Puzzles
 
-## 🚀 Features
+| Puzzle | Generation | Solving | Guarantee |
+|--------|------------|---------|-----------|
+| **Sudoku** | Backtracking fill + per-cell uniqueness check | Backtracking DFS | Unique solution |
+| **Maze** | DFS carving (perfect maze) | BFS | Shortest path |
+| **Word Ladder** | Single-letter mutation chain | BFS | Shortest path |
 
-✅ **Sudoku Generator & Solver**  
-- Generates valid Sudoku boards  
-- Solves them using **backtracking**  
-- Clean, interactive grid interface  
+## Quick Start — Docker (recommended)
 
-✅ **Maze Generator & Solver**  
-- Generates random mazes using **DFS**  
-- Solves them step by step  
-- Visually displays the solution path  
-
-✅ **Word Ladder Puzzle**  
-- Generates random words  
-- Finds the **shortest transformation path** between words using **BFS**  
-- Displays all steps in a clear format  
-
----
-
-## 🧠 Algorithms Used
-
-| Puzzle | Algorithm | Description |
-|--------|------------|-------------|
-| Sudoku | Backtracking | Systematically fills grid while checking validity |
-| Maze | Depth-First Search (DFS) | Carves maze paths and finds route from start to end |
-| Word Ladder | Breadth-First Search (BFS) | Finds shortest transformation between words |
-
----
-
-## 🖥️ Tech Stack
-- **Python 3.x**
-- **CustomTkinter**
-- **Tkinter**
-- **collections**, **random**, **string**
-
----
-
-## 📦 Installation
+No Python or Qt installation needed. Runs in any browser.
 
 ```bash
-# Clone the repo
-git clone https://github.com/AhmedAbdelghani28/puzzle-game-gui.git
+docker compose up --build
+```
 
-# Go to the project directory
-cd puzzle-game-gui
+Then open **http://localhost:6080/vnc.html** in your browser.
 
-# Install dependencies
-pip install customtkinter
+> The container streams the GUI over noVNC (browser-based VNC).  
+> Closing the app window stops the container automatically.
+
+## Local Setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
+## Running Tests
+
+```bash
+python -m pytest tests/ -v
+```
+
+## Project Structure
+
+```
+Dockerfile                       — two-stage build; Python + Qt system libs
+docker-compose.yml               — port 6080 → noVNC web UI
+docker/entrypoint.sh             — starts Xvfb → x11vnc → noVNC → app
+src/
+├── config.py                    — app-wide constants, Difficulty enum
+├── puzzles/
+│   ├── base.py                  — PuzzleGenerator / PuzzleSolver abstract contracts
+│   ├── sudoku.py                — generator + backtracking solver
+│   ├── maze.py                  — DFS generator + BFS solver
+│   └── word_ladder.py           — chain generator + BFS solver
+└── gui/
+    ├── _worker.py               — QThread wrapper for non-blocking solvers
+    ├── app.py                   — QMainWindow, navigation
+    ├── sudoku_view.py           — 9×9 grid, difficulty selector, threaded solve
+    ├── maze_view.py             — custom QPainter canvas, threaded BFS solve
+    └── word_ladder_view.py      — word info panel, threaded BFS solve
+tests/
+├── test_sudoku.py
+├── test_maze.py
+└── test_word_ladder.py
+```
+
+## Design Decisions
+
+- **Abstract base classes** (`PuzzleGenerator`, `PuzzleSolver`) define a uniform contract — adding a new game means implementing two methods.
+- **Separation of concerns** — puzzle logic in `src/puzzles/` knows nothing about Qt; the GUI only calls `generate()` and `solve()`.
+- **QThread + pyqtSignal** — solve operations run on a background thread; results are delivered to the UI thread via signals, keeping the window fully responsive.
+- **BFS for maze and word ladder** — guarantees the *shortest* path, not merely *a* path.
+- **Sudoku uniqueness** — each cell removal is validated by a solution counter capped at 2, so every generated puzzle has exactly one solution.
+- **Difficulty levels** map directly to removed-cell counts (Easy: 30, Medium: 40, Hard: 50).
+- **Docker / noVNC** — Xvfb provides a virtual display inside the container; x11vnc streams it over VNC; noVNC proxies VNC to WebSockets so any browser can view the GUI with zero client installation.

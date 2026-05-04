@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Version control & IDE
+.git/
+.gitignore
+.idea/
+*.iml
+
+# Claude / project tooling
+.claude/
+
+# Docker itself (avoid recursive copy)
+Dockerfile
+docker-compose.yml
+docker/
+
+# Docs (not needed at runtime)
+README.md
